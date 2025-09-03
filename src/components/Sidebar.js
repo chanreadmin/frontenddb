@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, Users, Calendar, Receipt, PieChart, Settings, HelpCircle, Component } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import { siteName } from '@/utils/general';
 
 const Sidebar = ({ isOpen }) => {
   const [activeItem, setActiveItem] = useState('Dashboard');
@@ -9,13 +10,13 @@ const Sidebar = ({ isOpen }) => {
   
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: `/dashboard/${user?.role.toLowerCase()}` },
-    { name: 'Patients', icon: Users, path: '/patients' },
+    // { name: 'Patients', icon: Users, path: '/patients' },
     { name: 'Users', icon: Users, path: '/users' },
-    { name: 'Departments', icon: Component, path: '/departments' },
-    // { name: 'Appointments', icon: Calendar, path: '/appointments' },
-    { name: 'Billing', icon: Receipt, path: '/billing' },
-    { name: 'Reports', icon: PieChart, path: '/reports' },
-    { name: 'Products', icon: Calendar, path: '/products' },
+    { name: 'Disease', icon: Calendar, path: '/dashboard/disease/disease' },
+    { name: 'Add Disease', icon: Calendar, path: '/dashboard/disease/add-disease' },
+    // { name: 'Billing', icon: Receipt, path: '/billing' },
+    // { name: 'Reports', icon: PieChart, path: '/reports' },
+    // { name: 'Products', icon: Calendar, path: '/products' },
   ];
 
   const bottomMenuItems = [
@@ -34,10 +35,10 @@ const Sidebar = ({ isOpen }) => {
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b sticky top-0 ">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center">
-            <span className="text-white font-bold">C</span>
+          <div className="w-8 h-8 rounded bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center px-2">
+            <span className="text-white font-bold text-xs">AAD</span>
           </div>
-          <span className="text-xl font-bold">ChanRe</span>
+          <span className="text-sm font-bold">{siteName}</span>
         </div>
       </div>
 

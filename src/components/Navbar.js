@@ -8,7 +8,7 @@ import { logout } from '../redux/slices/authSlice';
 const Navbar = ({ toggleSidebar }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
- 
+
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -31,7 +31,7 @@ const Navbar = ({ toggleSidebar }) => {
   };
 
   const ProfileDropdown = () => (
-    <div 
+    <div
       className={`bg-white
         absolute right-0 top-full mt-2 w-64 rounded-lg  shadow-lg border
         transform transition-all duration-200 ease-in-out
@@ -54,7 +54,7 @@ const Navbar = ({ toggleSidebar }) => {
             <span>View Profile</span>
           </span>
         </Link>
-        
+
         <Link href="/change-password">
           <span className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 cursor-pointer">
             <Lock size={18} />
@@ -62,7 +62,7 @@ const Navbar = ({ toggleSidebar }) => {
           </span>
         </Link>
 
-        <button 
+        <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2 text-red-600 rounded-md hover:bg-red-50 cursor-pointer"
         >
@@ -82,7 +82,7 @@ const Navbar = ({ toggleSidebar }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          
+
           <div className="hidden md:flex items-center gap-3 w-96">
             {/* <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -96,18 +96,15 @@ const Navbar = ({ toggleSidebar }) => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            {/* <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-              <Bell size={20} className="text-gray-600" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-            </button> */}
+          <div className="">
             
+
           </div>
 
           {/* <div className="h-8 w-px bg-gray-200" /> */}
 
           <div className="relative" ref={dropdownRef}>
-            <button 
+            <button
               className={`
                 flex items-center gap-2 p-2 rounded-lg
                 ${isProfileOpen ? 'bg-gray-100' : 'hover:bg-gray-100'}
@@ -120,11 +117,11 @@ const Navbar = ({ toggleSidebar }) => {
                 </span>
               </div>
               <div className="hidden md:block text-left">
-                <div className="text-sm font-medium">{user ? user.name : 'Guest'}</div>
+                {/* <div className="text-sm font-medium">{user ? user.name : 'Guest'}</div> */}
                 {/* <div className="text-xs text-gray-500 capitalize">{user ? user.role : ''}</div> */}
               </div>
-              <ChevronDown 
-                size={16} 
+              <ChevronDown
+                size={16}
                 className={`
                   text-gray-500 transition-transform duration-200
                   ${isProfileOpen ? 'rotate-180' : ''}

@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-pdf/renderer": "^4.0.0",
     "@reduxjs/toolkit": "^2.3.0",
+    "@tailwindcss/postcss": "^4.1.11",
     "axios": "^1.7.7",
     "babel-plugin-styled-components": "^2.1.4",
     "chart.js": "^4.4.5",
@@ -37,10 +38,11 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "daisyui": "^4.12.13",
+    "autoprefixer": "^10.4.21",
+    "daisyui": "^5.0.50",
     "eslint": "^8",
     "eslint-config-next": "15.3.3",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1"
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
   }
 }

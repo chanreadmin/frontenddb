@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUser, fetchUserDetails } from '@/redux/actions/userActions';
-import { fetchDepartments } from '@/redux/actions/departmentActions';
+
 import Layout from '@/components/Layout';
 import { User, Mail, Phone, Briefcase, GraduationCap, IndianRupee } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -15,7 +15,7 @@ const EditUser = () => {
 
   // Redux state
   const { loading, error, success, user } = useSelector((state) => state.users);
-  const { departments } = useSelector((state) => state.department);
+
 
   // Form state
   const [formData, setFormData] = useState({
@@ -24,7 +24,7 @@ const EditUser = () => {
     email: '',
     contactNumber: '',
     role: '',
-    department: '',
+
     specialization: '',
     consultationCharges: '',
   });
@@ -40,7 +40,7 @@ const EditUser = () => {
         email: '',
         contactNumber: '',
         role: '',
-        department: '',
+     
         specialization: '',
         consultationCharges: '',
       });
@@ -56,7 +56,7 @@ const EditUser = () => {
 
     console.log('Fetching user with ID:', id);
     dispatch(fetchUserDetails(id));
-    dispatch(fetchDepartments());
+ 
   }, [id, dispatch, router]);
 
   // Populate form when user data is fetched

@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/actions/authActions';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { Mail, Lock, Loader } from 'lucide-react';
+import { siteDescription, siteName } from '@/utils/general';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -39,8 +41,8 @@ const Login = () => {
       <div className="w-full max-w-md">
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-blue-600 mb-2">CHANRE VEENA</h1>
-          <p className="text-gray-600 text-sm">Rheumatology & Immunology Center</p>
+          <h1 className="text-2xl font-bold text-blue-600 mb-2">{siteName}</h1>
+          <p className="text-gray-600 text-sm">{siteDescription}</p>
         </div>
 
         {/* Login Card */}
@@ -105,6 +107,16 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="flex justify-end">
+              <Link 
+                href="/auth/forgot-password" 
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition duration-150 ease-in-out"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -119,7 +131,7 @@ const Login = () => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-600">
-           Copyright © {new Date().getFullYear()} Chanre Veena. All rights reserved.
+           Copyright © {new Date().getFullYear()} {siteName}. All rights reserved.
           </p>
         </div>
       </div>

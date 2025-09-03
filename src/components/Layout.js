@@ -36,15 +36,15 @@ const Layout = ({ children }) => {
         <div className="lg:ml-64 flex flex-col min-h-screen">
           <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
           <main className="flex-1 p-6">
-            <div className="max-w-7xl mx-auto">
-              <div className="mb-6">
+            <div className="w-full mx-auto">
+              {/* <div className="mb-6">
                 <h1 className="text-md font-semibold text-gray-800 flex items-center gap-2">
                   {greeting}, {user?.name}! 
                   <span className="inline-flex items-center animate-bounce">
                     <Icon className="h-5 w-5 text-yellow-500" />
                   </span>
                 </h1>
-              </div>
+              </div> */}
               <div className="rounded-lg shadow-sm border p-6">{children}</div>
             </div>
           </main>
