@@ -339,6 +339,27 @@ const DiseaseDetailPage = () => {
                       )}
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Type
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 flex-1">
+                        {currentEntry.type || (
+                          <span className="text-gray-400 italic">Not specified</span>
+                        )}
+                      </p>
+                      {currentEntry.type && (
+                        <button
+                          onClick={() => copyToClipboard(currentEntry.type, "Type")}
+                          className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <Copy size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

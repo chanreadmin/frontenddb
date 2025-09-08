@@ -41,7 +41,10 @@ const DiseasePage = () => {
   } = useSelector((state) => state.disease);
 
   const [showFilters, setShowFilters] = useState(false);
-  const [localFilters, setLocalFilters] = useState(filters);
+  const [localFilters, setLocalFilters] = useState({
+    ...filters,
+    type: filters.type || "",
+  });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const searchContainerRef = useRef(null);
@@ -290,6 +293,7 @@ const DiseasePage = () => {
       autoantibody: "",
       autoantigen: "",
       epitope: "",
+      type: "",
       sortBy: "disease",
       sortOrder: "asc",
     });
@@ -325,7 +329,8 @@ const DiseasePage = () => {
     localFilters.disease ||
     localFilters.autoantibody ||
     localFilters.autoantigen ||
-    localFilters.epitope;
+    localFilters.epitope ||
+    localFilters.type;
 
   return (
     <Layout>
@@ -349,28 +354,6 @@ const DiseasePage = () => {
         </Link>
       </div>
 
-      {/* Statistics Cards */}
-      {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-blue-50 rounded-lg p-4 text-center">
-          <h3 className="text-2xl font-bold text-blue-600">
-            {statistics?.overview?.totalEntries || 0}
-          </h3>
-          <p className="text-blue-800 text-sm font-medium">Total Entries</p>
-        </div>
-        <div className="bg-green-50 rounded-lg p-4 text-center">
-          <h3 className="text-2xl font-bold text-green-600">
-            {statistics?.overview?.uniqueDiseasesCount || 0}
-          </h3>
-          <p className="text-green-800 text-sm font-medium">Diseases</p>
-        </div>
-        <div className="bg-purple-50 rounded-lg p-4 text-center">
-          <h3 className="text-2xl font-bold text-purple-600">
-            {statistics?.overview?.uniqueAntibodiesCount || 0}
-          </h3>
-          <p className="text-purple-800 text-sm font-medium">Autoantibodies</p>
-        </div>
-      </div> */}
-
       {/* Search Bar */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="flex flex-1 gap-2" ref={searchContainerRef}>
@@ -384,6 +367,7 @@ const DiseasePage = () => {
             <option value="autoantibody">Autoantibody</option>
             <option value="autoantigen">Autoantigen</option>
             <option value="epitope">Epitope</option>
+            <option value="type">Type</option>
           </select>
 
           <input
@@ -620,6 +604,11 @@ const DiseasePage = () => {
                     Epitope: {appliedFilters.epitope}
                   </span>
                 )}
+                {appliedFilters.type && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                    Type: {appliedFilters.type}
+                  </span>
+                )}
               </div>
             </div>
           )}
@@ -706,6 +695,9 @@ const DiseasePage = () => {
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     UniPort ID
                   </th>
+                  {/* <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Type
+                  </th> */}
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Actions
                   </th>
@@ -737,7 +729,7 @@ const DiseasePage = () => {
                           href={`https://www.uniprot.org/uniprot/${entry.uniprotId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 font-mono text-xs underline"
+                          className="text-blue-600 hover:text-blue-800 font-mono text-xs font-bold"
                         >
                           {entry.uniprotId}
                         </Link>
@@ -745,6 +737,11 @@ const DiseasePage = () => {
                         <span className="text-gray-400 italic">N/A</span>
                       )}
                     </td>
+                    {/* <td className="px-4 py-3 text-sm text-gray-700">
+                      {entry.type || (
+                        <span className="text-gray-400 italic"></span>
+                      )}
+                    </td> */}
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <Link

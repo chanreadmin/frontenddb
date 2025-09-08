@@ -40,7 +40,8 @@ const DiseaseExample = () => {
     autoantibody: '',
     autoantigen: '',
     epitope: '',
-    uniprotId: ''
+    uniprotId: '',
+    type: ''
   });
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +56,7 @@ const DiseaseExample = () => {
   // Handle success messages
   useEffect(() => {
     if (createSuccess) {
-      setFormData({ disease: '', autoantibody: '', autoantigen: '', epitope: '', uniprotId: '' });
+      setFormData({ disease: '', autoantibody: '', autoantigen: '', epitope: '', uniprotId: '', type: '' });
       dispatch(clearCreateSuccess());
       dispatch(getAllEntries({ page: 1, limit: 10 })); // Refresh list
     }
@@ -64,7 +65,7 @@ const DiseaseExample = () => {
   useEffect(() => {
     if (updateSuccess) {
       setEditingId(null);
-      setFormData({ disease: '', autoantibody: '', autoantigen: '', epitope: '', uniprotId: '' });
+      setFormData({ disease: '', autoantibody: '', autoantigen: '', epitope: '', uniprotId: '', type: '' });
       dispatch(clearUpdateSuccess());
     }
   }, [updateSuccess, dispatch]);
@@ -105,7 +106,8 @@ const DiseaseExample = () => {
       autoantibody: entry.autoantibody,
       autoantigen: entry.autoantigen,
       epitope: entry.epitope || '',
-      uniprotId: entry.uniprotId || ''
+      uniprotId: entry.uniprotId || '',
+      type: entry.type || ''
     });
     setEditingId(entry._id);
   };
@@ -113,7 +115,7 @@ const DiseaseExample = () => {
   // Cancel edit
   const cancelEdit = () => {
     setEditingId(null);
-    setFormData({ disease: '', autoantibody: '', autoantigen: '', epitope: '', uniprotId: '' });
+    setFormData({ disease: '', autoantibody: '', autoantigen: '', epitope: '', uniprotId: '', type: '' });
   };
 
   // Handle search
@@ -243,6 +245,15 @@ const DiseaseExample = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Type</label>
+            <input
+              type="text"
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+            />
+          </div>
         </div>
         <div className="flex gap-2 mt-4">
           <button
@@ -274,6 +285,7 @@ const DiseaseExample = () => {
               <th className="px-4 py-2 border-b text-left">Autoantigen</th>
               <th className="px-4 py-2 border-b text-left">Epitope</th>
               <th className="px-4 py-2 border-b text-left">UniProt ID</th>
+              <th className="px-4 py-2 border-b text-left">Type</th>
               <th className="px-4 py-2 border-b text-left">Actions</th>
             </tr>
           </thead>
@@ -302,6 +314,7 @@ const DiseaseExample = () => {
                     {entry.uniprotId}
                     </Link>
                    </td>
+                  <td className="px-4 py-2 border-b">{entry.type || '-'}</td>
                   <td className="px-4 py-2 border-b">
                     <div className="flex gap-2">
                       <button

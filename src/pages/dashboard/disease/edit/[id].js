@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
-import { createEntry } from '@/redux/actions/diseaseActions';
-import { clearCreateSuccess, clearError } from '@/redux/slices/diseaseSlice';
-import { Plus, ArrowLeft, Save, X } from 'lucide-react';
 import Link from 'next/link';
+import { getEntryById, updateEntry } from '@/redux/actions/diseaseActions';
+import { clearUpdateSuccess, clearError, clearEntryError } from '@/redux/slices/diseaseSlice';
+import { ArrowLeft, Save, X } from 'lucide-react';
 
-const AddDisease = () => {
+const EditDisease = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { loading, error, createSuccess } = useSelector((state) => state.disease);
+  const { id } = router.query;
+
+  const { currentEntry, entryLoading, loading, error, entryError, updateSuccess } = useSelector((state) => state.disease);
 
   const [formData, setFormData] = useState({
     disease: '',
@@ -23,37 +25,50 @@ const AddDisease = () => {
 
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Clear success message and redirect after successful creation
+  // Load entry by ID
   useEffect(() => {
-    if (createSuccess) {
-      dispatch(clearCreateSuccess());
-      router.push('/dashboard/superadmin');
+    if (id && id !== 'undefined') {
+      dispatch(getEntryById(id));
     }
-  }, [createSuccess, dispatch, router]);
+  }, [id, dispatch]);
 
-  // Clear error when component unmounts
+  // Populate form when entry loads
+  useEffect(() => {
+    if (currentEntry?._id) {
+      setFormData({
+        disease: currentEntry.disease || '',
+        autoantibody: currentEntry.autoantibody || '',
+        autoantigen: currentEntry.autoantigen || '',
+        epitope: currentEntry.epitope || '',
+        uniprotId: currentEntry.uniprotId || '',
+        type: currentEntry.type || ''
+      });
+    }
+  }, [currentEntry]);
+
+  // Redirect after successful update
+  useEffect(() => {
+    if (updateSuccess && id) {
+      dispatch(clearUpdateSuccess());
+      router.push(`/dashboard/disease/${id}`);
+    }
+  }, [updateSuccess, id, dispatch, router]);
+
+  // Clear errors on unmount
   useEffect(() => {
     return () => {
       dispatch(clearError());
+      dispatch(clearEntryError());
     };
   }, [dispatch]);
 
   const validateForm = () => {
     const errors = {};
-    
-    if (!formData.disease.trim()) {
-      errors.disease = 'Disease name is required';
-    }
-    
-    if (!formData.autoantibody.trim()) {
-      errors.autoantibody = 'Autoantibody is required';
-    }
-    
-    if (!formData.autoantigen.trim()) {
-      errors.autoantigen = 'Autoantigen is required';
-    }
 
-    // Validate UniProt ID format if provided
+    if (!formData.disease.trim()) errors.disease = 'Disease name is required';
+    if (!formData.autoantibody.trim()) errors.autoantibody = 'Autoantibody is required';
+    if (!formData.autoantigen.trim()) errors.autoantigen = 'Autoantigen is required';
+
     if (formData.uniprotId.trim() && !/^[A-Z0-9]{6,10}$/.test(formData.uniprotId.trim())) {
       errors.uniprotId = 'UniProt ID should be 6-10 alphanumeric characters';
     }
@@ -64,49 +79,39 @@ const AddDisease = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     try {
-      await dispatch(createEntry(formData));
-    } catch (error) {
-      console.error('Failed to create disease entry:', error);
+      await dispatch(updateEntry({ id, entryData: formData }));
+    } catch (err) {
+      // Handled by redux
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear validation error when user starts typing
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setValidationErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
   const handleClearError = () => {
     dispatch(clearError());
+    dispatch(clearEntryError());
   };
 
-  const resetForm = () => {
-    setFormData({
-      disease: '',
-      autoantibody: '',
-      autoantigen: '',
-      epitope: '',
-      uniprotId: '',
-      type: ''
-    });
-    setValidationErrors({});
-  };
+  if (entryLoading || !id || (!currentEntry && !entryError)) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading entry...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -114,28 +119,25 @@ const AddDisease = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Link 
-              href="/dashboard/superadmin"
+            <Link
+              href={`/dashboard/disease/${id}`}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ArrowLeft size={16} />
             </Link>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">Add New Disease Entry</h1>
-              <p className="text-gray-600 text-xs">Create a new disease-autoantibody-autoantigen association</p>
+              <h1 className="text-lg font-bold text-gray-900">Edit Disease Entry</h1>
+              <p className="text-gray-600 text-xs">Update the disease-autoantibody-autoantigen association</p>
             </div>
           </div>
         </div>
 
         {/* Error Display */}
-        {error && (
+        {(error || entryError) && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             <div className="flex justify-between items-center">
-              <span>{error}</span>
-              <button 
-                onClick={handleClearError} 
-                className="text-red-500 hover:text-red-700 transition-colors"
-              >
+              <span>{error || entryError}</span>
+              <button onClick={handleClearError} className="text-red-500 hover:text-red-700 transition-colors">
                 <X size={18} />
               </button>
             </div>
@@ -244,9 +246,7 @@ const AddDisease = () => {
               {validationErrors.uniprotId && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.uniprotId}</p>
               )}
-              <p className="mt-1 text-sm text-gray-500">
-                Optional: UniProt database identifier for the antigen protein
-              </p>
+              <p className="mt-1 text-sm text-gray-500">Optional: UniProt database identifier for the antigen protein</p>
             </div>
 
             {/* Type */}
@@ -267,18 +267,10 @@ const AddDisease = () => {
             </div>
 
             {/* Form Actions */}
-            <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-              >
-                Reset Form
-              </button>
-              
+            <div className="flex items-center justify-end pt-6 border-t border-gray-200">
               <div className="flex gap-3">
                 <Link
-                  href="/dashboard/superadmin"
+                  href={`/dashboard/disease/${id}`}
                   className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
                 >
                   Cancel
@@ -296,7 +288,7 @@ const AddDisease = () => {
                   ) : (
                     <>
                       <Save size={18} />
-                      Save Disease Entry
+                      Save Changes
                     </>
                   )}
                 </button>
@@ -304,21 +296,11 @@ const AddDisease = () => {
             </div>
           </form>
         </div>
-
-        {/* Help Section */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-blue-800 mb-2">Tips for adding disease entries:</h3>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>• Use standard medical terminology for disease names</li>
-            <li>• Include the specific autoantibody type (e.g., IgG, IgM)</li>
-            <li>• Provide the most specific antigen information available</li>
-            <li>• UniProt ID should be in the format P12345 or A1B2C3</li>
-            <li>• All required fields must be filled before submission</li>
-          </ul>
-        </div>
       </div>
     </Layout>
   );
 };
 
-export default AddDisease;
+export default EditDisease;
+
+

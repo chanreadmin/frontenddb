@@ -18,7 +18,8 @@ export const getAllEntries = createAsyncThunk(
         autoantigen,
         epitope,
         sortBy = 'disease', 
-        sortOrder = 'asc' 
+        sortOrder = 'asc', 
+        type
       } = params;
       
       const queryParams = new URLSearchParams({
@@ -37,6 +38,7 @@ export const getAllEntries = createAsyncThunk(
       if (autoantibody && autoantibody.trim()) queryParams.append('autoantibody', autoantibody.trim());
       if (autoantigen && autoantigen.trim()) queryParams.append('autoantigen', autoantigen.trim());
       if (epitope && epitope.trim()) queryParams.append('epitope', epitope.trim());
+      if (type && type.trim()) queryParams.append('type', type.trim());
       
       const response = await axiosInstance.get(`/api/disease?${queryParams}`);
       return response.data;
@@ -241,8 +243,8 @@ export const getUniqueValues = createAsyncThunk(
   'disease/getUniqueValues',
   async (field, thunkAPI) => {
     try {
-      if (!field || !['disease', 'autoantibody', 'autoantigen', 'uniprotId'].includes(field)) {
-        throw new Error('Valid field is required (disease, autoantibody, autoantigen, uniprotId)');
+      if (!field || !['disease', 'autoantibody', 'autoantigen', 'uniprotId', 'type'].includes(field)) {
+        throw new Error('Valid field is required (disease, autoantibody, autoantigen, uniprotId, type)');
       }
       
       const response = await axiosInstance.get(`/api/disease/unique/${field}`);
