@@ -14,6 +14,7 @@ const Sidebar = ({ isOpen }) => {
     { name: 'Users', icon: Users, path: '/users' },
     { name: 'Disease', icon: Calendar, path: '/dashboard/disease/disease' },
     { name: 'Add Disease', icon: Calendar, path: '/dashboard/disease/add-disease' },
+    { name: 'Import Disease', icon: Calendar, path: '/dashboard/disease/import' },
     // { name: 'Billing', icon: Receipt, path: '/billing' },
     // { name: 'Reports', icon: PieChart, path: '/reports' },
     // { name: 'Products', icon: Calendar, path: '/products' },

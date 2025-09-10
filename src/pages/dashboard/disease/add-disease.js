@@ -4,13 +4,15 @@ import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import { createEntry } from '@/redux/actions/diseaseActions';
 import { clearCreateSuccess, clearError } from '@/redux/slices/diseaseSlice';
-import { Plus, ArrowLeft, Save, X } from 'lucide-react';
+import { Plus, ArrowLeft, Save, X, XCircleIcon, ArchiveRestoreIcon } from 'lucide-react';
 import Link from 'next/link';
+import axiosInstance from '@/utils/axiosSetup';
 
 const AddDisease = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { loading, error, createSuccess } = useSelector((state) => state.disease);
+  const STORAGE_KEY = 'autoabdb_additional_keys';
 
   const [formData, setFormData] = useState({
     disease: '',
@@ -22,6 +24,35 @@ const AddDisease = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+  const [additionalFields, setAdditionalFields] = useState([]);
+
+  // Prefill Additional Information with previously used keys from localStorage and API
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let localKeys = [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) localKeys = parsed.map((k) => String(k));
+    } catch (_) {}
+
+    const loadApiKeys = async () => {
+      try {
+        const resp = await axiosInstance.get('/api/disease/additional/keys');
+        const apiKeys = Array.isArray(resp.data?.data) ? resp.data.data.map((k) => String(k)) : [];
+        const merged = Array.from(new Set([...apiKeys, ...localKeys]));
+        if (merged.length > 0) {
+          setAdditionalFields(merged.map((k) => ({ key: k, value: '' })));
+        }
+      } catch (_err) {
+        if (localKeys.length > 0) {
+          setAdditionalFields(localKeys.map((k) => ({ key: k, value: '' })));
+        }
+      }
+    };
+
+    loadApiKeys();
+  }, []);
 
   // Clear success message and redirect after successful creation
   useEffect(() => {
@@ -70,7 +101,35 @@ const AddDisease = () => {
     }
 
     try {
-      await dispatch(createEntry(formData));
+      const additional = additionalFields.reduce((acc, pair) => {
+        const key = (pair.key || '').trim();
+        const value = (pair.value || '').toString().trim();
+        if (key && value) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+
+      // Persist used keys to localStorage for future prefill
+      if (typeof window !== 'undefined') {
+        try {
+          const existingRaw = localStorage.getItem(STORAGE_KEY);
+          const existing = existingRaw ? JSON.parse(existingRaw) : [];
+          const submittedKeys = additionalFields
+            .map((p) => (p.key || '').trim())
+            .filter((k) => k);
+          const merged = Array.from(new Set([...(Array.isArray(existing) ? existing : []), ...submittedKeys]));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        } catch (_) {
+          // ignore storage errors
+        }
+      }
+
+      const payload = Object.keys(additional).length > 0
+        ? { ...formData, additional }
+        : formData;
+
+      await dispatch(createEntry(payload));
     } catch (error) {
       console.error('Failed to create disease entry:', error);
     }
@@ -106,6 +165,19 @@ const AddDisease = () => {
       type: ''
     });
     setValidationErrors({});
+    setAdditionalFields([]);
+  };
+
+  const addAdditionalField = () => {
+    setAdditionalFields((prev) => [...prev, { key: '', value: '' }]);
+  };
+
+  const removeAdditionalField = (index) => {
+    setAdditionalFields((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateAdditionalField = (index, field, value) => {
+    setAdditionalFields((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   };
 
   return (
@@ -120,7 +192,7 @@ const AddDisease = () => {
             >
               <ArrowLeft size={16} />
             </Link>
-            <div>
+            <div className=''>
               <h1 className="text-lg font-bold text-gray-900">Add New Disease Entry</h1>
               <p className="text-gray-600 text-xs">Create a new disease-autoantibody-autoantigen association</p>
             </div>
@@ -266,27 +338,74 @@ const AddDisease = () => {
               <p className="mt-1 text-sm text-gray-500">Optional: Entry classification or antibody type</p>
             </div>
 
+            {/* Additional Information (dynamic key-value pairs) */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Additional Information
+                </label>
+                <button
+                  type="button"
+                  onClick={addAdditionalField}
+                  className="inline-flex items-center gap-1 px-2 py-1 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100"
+                >
+                  <Plus size={14} /> Add Field
+                </button>
+              </div>
+              {additionalFields.length === 0 && (
+                <p className="text-xs text-gray-500 mb-2">Add custom key-value metadata (e.g., source, notes, PMID).</p>
+              )}
+              <div className="space-y-2">
+                {additionalFields.map((pair, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-2 items-center">
+                    <input
+                      type="text"
+                      value={pair.key}
+                      onChange={(e) => updateAdditionalField(index, 'key', e.target.value)}
+                      placeholder="Key (e.g., PMID)"
+                      className="col-span-5 capitalize px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <input
+                      type="text"
+                      value={pair.value}
+                      onChange={(e) => updateAdditionalField(index, 'value', e.target.value)}
+                      placeholder={`Write here ${pair.key}`}
+                      className="col-span-6 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeAdditionalField(index)}
+                      className="col-span-1 flex items-center justify-center h-10 text-red-600 hover:text-red-700"
+                      aria-label="Remove field"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Form Actions */}
-            <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-              <button
+            <div className="flex items-center justify-center pt-6 border-t border-gray-200">
+              {/* <button
                 type="button"
                 onClick={resetForm}
                 className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
               >
-                Reset Form
-              </button>
+                <ArchiveRestoreIcon size={18} />
+              </button> */}
               
               <div className="flex gap-3">
                 <Link
                   href="/dashboard/superadmin"
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                  className="px-4 py-2 text-red-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
                 >
-                  Cancel
+                  <XCircleIcon size={18} />
                 </Link>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-6 py-2  text-black rounded-lg shadow hover:bg-blue-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -296,7 +415,7 @@ const AddDisease = () => {
                   ) : (
                     <>
                       <Save size={18} />
-                      Save Disease Entry
+                     
                     </>
                   )}
                 </button>

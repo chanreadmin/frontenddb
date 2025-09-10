@@ -42,7 +42,7 @@ const DiseaseDetailPage = () => {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [copySuccess, setCopySuccess] = useState("");
-
+  console.log(currentEntry);
   // Load entry data when ID is available
   useEffect(() => {
     if (id && id !== "undefined") {
@@ -202,24 +202,24 @@ const DiseaseDetailPage = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={shareEntry}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-gray-600 border border-gray-300 shadow rounded-lg hover: transition-colors"
             >
               <Share2 size={16} />
-              Share
+              
             </button>
             <Link
               href={`/dashboard/disease/edit/${currentEntry._id}`}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-green-600 shadow rounded-lg  transition-colors"
             >
               <Edit2Icon size={16} />
-              Edit Entry
+              
             </Link>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 shadow text-red-600 rounded-lg  transition-colors"
             >
-              <Trash2 size={16} />
-              Delete
+              <Trash2 size={16} className="text-red-600"/>
+            
             </button>
           </div>
         </div>
@@ -231,9 +231,9 @@ const DiseaseDetailPage = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {/* Primary Information Card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
@@ -274,7 +274,7 @@ const DiseaseDetailPage = () => {
                       Autoantibody
                     </label>
                     <div className="flex items-center gap-2">
-                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 flex-1">
+                      <p className="text-base text-gray-900  px-3 py-2 rounded-lg border border-gray-200 flex-1">
                         {currentEntry.autoantibody}
                       </p>
                       <button
@@ -298,7 +298,7 @@ const DiseaseDetailPage = () => {
                       Autoantigen
                     </label>
                     <div className="flex items-center gap-2">
-                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 flex-1">
+                      <p className="text-base text-gray-900  px-3 py-2 rounded-lg border border-gray-200 flex-1">
                         {currentEntry.autoantigen}
                       </p>
                       <button
@@ -320,7 +320,7 @@ const DiseaseDetailPage = () => {
                       Epitope
                     </label>
                     <div className="flex items-center gap-2">
-                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 flex-1">
+                      <p className="text-base text-gray-900  px-3 py-2 rounded-lg border border-gray-200 flex-1">
                         {currentEntry.epitope || (
                           <span className="text-gray-400 italic">
                             Not specified
@@ -345,14 +345,18 @@ const DiseaseDetailPage = () => {
                       Type
                     </label>
                     <div className="flex items-center gap-2">
-                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 flex-1">
+                      <p className="text-base text-gray-900  px-3 py-2 rounded-lg border border-gray-200 flex-1">
                         {currentEntry.type || (
-                          <span className="text-gray-400 italic">Not specified</span>
+                          <span className="text-gray-400 italic">
+                            Not specified
+                          </span>
                         )}
                       </p>
                       {currentEntry.type && (
                         <button
-                          onClick={() => copyToClipboard(currentEntry.type, "Type")}
+                          onClick={() =>
+                            copyToClipboard(currentEntry.type, "Type")
+                          }
                           className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                         >
                           <Copy size={14} />
@@ -370,7 +374,7 @@ const DiseaseDetailPage = () => {
                 UniProt Information
               </h2>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-4  rounded-lg border border-gray-200">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     UniPort ID
@@ -408,6 +412,61 @@ const DiseaseDetailPage = () => {
               </div>
             </div>
 
+            {/* Additional Information Card */}
+            {(() => {
+              // Normalize possible Map to plain object
+              let additionalObj = {};
+              if (currentEntry.additional) {
+                if (
+                  typeof currentEntry.additional.forEach === 'function' &&
+                  typeof currentEntry.additional.get === 'function'
+                ) {
+                  currentEntry.additional.forEach((v, k) => {
+                    additionalObj[k] = v;
+                  });
+                } else {
+                  additionalObj = currentEntry.additional;
+                }
+              }
+              return additionalObj && Object.keys(additionalObj).length > 0 ? (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    Additional Information
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(additionalObj).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          className="p-4  rounded-lg border border-gray-200"
+                        >
+                          <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                            {key}
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm text-gray-900 break-words">
+                              {value}
+                            </p>
+                            {value && (
+                              <button
+                                onClick={() =>
+                                  copyToClipboard(String(value), key)
+                                }
+                                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                              >
+                                <Copy size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
             {/* Related Entries */}
             {relatedEntries && relatedEntries.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -419,7 +478,7 @@ const DiseaseDetailPage = () => {
                   {relatedEntries.map((related) => (
                     <div
                       key={related._id}
-                      className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+                      className="p-4  rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
                       onClick={() => handleRelatedEntryClick(related)}
                     >
                       <div className="flex items-center justify-between">
@@ -453,11 +512,11 @@ const DiseaseDetailPage = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Metadata Card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Entry Metadata
+               Metadata
               </h3>
 
               <div className="space-y-4">
@@ -584,7 +643,7 @@ const DiseaseDetailPage = () => {
                 be undone.
               </p>
 
-              <div className="bg-gray-50 p-3 rounded-lg mb-6 border">
+              <div className=" p-3 rounded-lg mb-6 border">
                 <p className="text-sm font-medium text-gray-700">
                   Entry to be deleted:
                 </p>

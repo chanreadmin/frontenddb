@@ -24,6 +24,7 @@ const EditDisease = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+  const [additionalFields, setAdditionalFields] = useState([]); // [{ key: '', value: '' }]
 
   // Load entry by ID
   useEffect(() => {
@@ -43,6 +44,22 @@ const EditDisease = () => {
         uniprotId: currentEntry.uniprotId || '',
         type: currentEntry.type || ''
       });
+      // Support both plain object and Map serialized from Mongo/Mongoose
+      let additionalObj = {};
+      if (currentEntry.additional) {
+        if (typeof currentEntry.additional.forEach === 'function' && typeof currentEntry.additional.get === 'function') {
+          // Likely a Map
+          currentEntry.additional.forEach((v, k) => {
+            additionalObj[k] = v;
+          });
+        } else {
+          additionalObj = currentEntry.additional;
+        }
+      }
+      const entries = additionalObj && Object.keys(additionalObj).length > 0
+        ? Object.entries(additionalObj).map(([k, v]) => ({ key: k, value: v }))
+        : [];
+      setAdditionalFields(entries);
     }
   }, [currentEntry]);
 
@@ -81,7 +98,15 @@ const EditDisease = () => {
     e.preventDefault();
     if (!validateForm()) return;
     try {
-      await dispatch(updateEntry({ id, entryData: formData }));
+      const additionalObject = additionalFields.reduce((acc, { key, value }) => {
+        const trimmedKey = (key || '').toString().trim();
+        const trimmedValue = (value || '').toString();
+        if (trimmedKey) {
+          acc[trimmedKey] = trimmedValue;
+        }
+        return acc;
+      }, {});
+      await dispatch(updateEntry({ id, entryData: { ...formData, additional: additionalObject } }));
     } catch (err) {
       // Handled by redux
     }
@@ -98,6 +123,18 @@ const EditDisease = () => {
   const handleClearError = () => {
     dispatch(clearError());
     dispatch(clearEntryError());
+  };
+
+  const handleAddAdditional = () => {
+    setAdditionalFields((prev) => [...prev, { key: '', value: '' }]);
+  };
+
+  const handleRemoveAdditional = (index) => {
+    setAdditionalFields((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleChangeAdditional = (index, field, value) => {
+    setAdditionalFields((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   };
 
   if (entryLoading || !id || (!currentEntry && !entryError)) {
@@ -264,6 +301,51 @@ const EditDisease = () => {
                 placeholder="e.g., IgG, IgM, subtype, etc."
               />
               <p className="mt-1 text-sm text-gray-500">Optional: Entry classification or antibody type</p>
+            </div>
+
+            {/* Additional Fields */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">Additional Fields</label>
+                <button
+                  type="button"
+                  onClick={handleAddAdditional}
+                  className="text-blue-600 text-sm hover:underline"
+                >
+                  + Add field
+                </button>
+              </div>
+              {additionalFields.length === 0 && (
+                <p className="text-xs text-gray-500">No additional fields. Click "Add field" to include custom metadata.</p>
+              )}
+              <div className="space-y-3">
+                {additionalFields.map((pair, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-3 items-center">
+                    <input
+                      type="text"
+                      value={pair.key}
+                      onChange={(e) => handleChangeAdditional(index, 'key', e.target.value)}
+                      className="col-span-5 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Key (e.g., species, assay, reference)"
+                    />
+                    <input
+                      type="text"
+                      value={pair.value}
+                      onChange={(e) => handleChangeAdditional(index, 'value', e.target.value)}
+                      className="col-span-6 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Value"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAdditional(index)}
+                      className="col-span-1 text-red-600 hover:text-red-800"
+                      aria-label="Remove field"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Form Actions */}

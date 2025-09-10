@@ -218,17 +218,20 @@ const DiseasePage = () => {
     const antibodies = new Set();
     const antigens = new Set();
     const epitopes = new Set();
+    const types = new Set();
     (searchResults || []).forEach((r) => {
       addUnique(diseases, r.disease);
       addUnique(antibodies, r.autoantibody);
       addUnique(antigens, r.autoantigen);
       addUnique(epitopes, r.epitope);
+      addUnique(types, r.type);
     });
     return {
       disease: Array.from(diseases).slice(0, limitPerGroup),
       autoantibody: Array.from(antibodies).slice(0, limitPerGroup),
       autoantigen: Array.from(antigens).slice(0, limitPerGroup),
       epitope: Array.from(epitopes).slice(0, limitPerGroup),
+      type: Array.from(types).slice(0, limitPerGroup),
     };
   }, [searchResults]);
 
@@ -390,7 +393,7 @@ const DiseasePage = () => {
           {showSuggestions && (
             <div className="absolute z-20 mt-12 w-full max-w-3xl bg-white border border-gray-200 rounded-md shadow-lg p-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["disease", "autoantibody", "autoantigen", "epitope"].map(
+                {["disease", "autoantibody", "autoantigen", "epitope", "type"].map(
                   (section) => (
                     <div key={section}>
                       <div className="text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -581,7 +584,7 @@ const DiseasePage = () => {
                 </span>
                 {appliedFilters.search && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                    Search: "{appliedFilters.search}"
+                    Search: &quot;{appliedFilters.search}&quot;
                   </span>
                 )}
                 {appliedFilters.disease && (
@@ -695,9 +698,9 @@ const DiseasePage = () => {
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     UniPort ID
                   </th>
-                  {/* <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Type
-                  </th> */}
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Actions
                   </th>
@@ -726,7 +729,7 @@ const DiseasePage = () => {
                     <td className="px-4 py-3 text-sm">
                       {entry.uniprotId ? (
                         <Link
-                          href={`https://www.uniprot.org/uniprot/${entry.uniprotId}`}
+                          href={`https://www.uniprot.org/uniprot/${entry.uniprotId}/entry`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-800 font-mono text-xs font-bold"
@@ -737,11 +740,11 @@ const DiseasePage = () => {
                         <span className="text-gray-400 italic">N/A</span>
                       )}
                     </td>
-                    {/* <td className="px-4 py-3 text-sm text-gray-700">
+                    <td className="px-4 py-3 text-sm text-gray-700">
                       {entry.type || (
                         <span className="text-gray-400 italic"></span>
                       )}
-                    </td> */}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <Link

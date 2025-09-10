@@ -317,3 +317,23 @@ export const exportEntries = createAsyncThunk(
     }
   }
 );
+
+export const importEntriesFromFile = createAsyncThunk(
+  'disease/importEntriesFromFile',
+  async (file, thunkAPI) => {
+    try {
+      if (!file) {
+        throw new Error('File is required');
+      }
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await axiosInstance.post('/api/disease/import/file', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Import from file error:', error.response?.data || error.message);
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to import from file');
+    }
+  }
+);
