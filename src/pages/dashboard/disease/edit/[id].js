@@ -316,7 +316,7 @@ const EditDisease = () => {
                 </button>
               </div>
               {additionalFields.length === 0 && (
-                <p className="text-xs text-gray-500">No additional fields. Click "Add field" to include custom metadata.</p>
+                <p className="text-xs text-gray-500">No additional fields. Click &quot;Add field&quot; to include custom metadata.</p>
               )}
               <div className="space-y-3">
                 {additionalFields.map((pair, index) => (
@@ -384,5 +384,3 @@ const EditDisease = () => {
 };
 
 export default EditDisease;
-
-
